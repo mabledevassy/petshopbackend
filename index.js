@@ -48,7 +48,18 @@ app.get('/view',async(request,response)=>{
     var data=await catemodel.find();
     response.send(data)
 });
-app.get('/view',async(request,response)=>{
+app.get('/views',async(request,response)=>{
     var data=await subcatemodel.find();
     response.send(data)
 });
+
+app.put('/edit/:id',async(request,response)=>{
+    let id=request.params.id
+    await catemodel.findByIdAndUpdate(id,request.body)
+    response.send("Data uploaded")
+});
+app.put('/edit/:id',async(request,response)=>{
+    let id=request.params.id
+    await subcatemodel.findByIdAndUpdate(id,request.body)
+    response.send("Data uploaded")
+})
