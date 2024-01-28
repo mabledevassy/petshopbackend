@@ -1,3 +1,4 @@
+
 const mongoose=require("mongoose")
 mongoose.connect("mongodb+srv://mabledevassy:mabledevassy@cluster0.gbmrfr9.mongodb.net/?retryWrites=true&w=majority")
 .then(()=>{console.log("DB connected")})
@@ -8,7 +9,9 @@ const itemschema=new it(
     {
         Category:String,
         Subcategory:String,
-        image1:{
+        Description:String,
+        Price:Number,
+         image1:{
             data:Buffer,
             contentType:String,
         }
