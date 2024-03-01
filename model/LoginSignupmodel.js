@@ -3,12 +3,15 @@ mongoose.connect("mongodb+srv://mabledevassy:mabledevassy@cluster0.gbmrfr9.mongo
 .then(()=>{console.log("DB connected")})
 .catch(err=>console.log(err));
 
-let ca=mongoose.Schema;
-const cateschema=new ca(
+let log=mongoose.Schema;
+const loginschema=new log(
     {
-        Cname:String,
-        Status:String
+    Name:String,
+    Email:String,
+    Password:String,
+    Confirmpassword:String
+    
     }
 );
-var catemodel=mongoose.model("cat",cateschema)
-module.exports=catemodel;
+var signupmodel=mongoose.model("signup",loginschema)
+module.exports=signupmodel;
