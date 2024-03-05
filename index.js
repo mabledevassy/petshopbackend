@@ -15,9 +15,9 @@ const app = new express();
 const catemodel = require('./model/Categorydetails')
 const subcatemodel = require('./model/Subcategorydetails');
 const itemmodel = require("./model/Itemdetails");
-const data2model=require('./model/Loginmodel');
-const ordermodel=require('./model/Orderdetails');
-const signupmodel=require('./model/LoginSignupmodel');
+const data2model = require('./model/Loginmodel');
+const ordermodel = require('./model/Orderdetails');
+const signupmodel = require('./model/LoginSignupmodel');
 const data3model=require('./model/Logmodel');
 
 app.use(express.urlencoded({ extended: true }))
@@ -42,11 +42,17 @@ app.post('/new', (request, response) => {
     response.send("Record Successfully Saved")
 
 })
+// app.post('/lnew', (request, response) => {
+//     console.log(request.body)
+//     new signupmodel(request.body).save();
+//     response.send("Record Successfully Saved")
+
+// })
+
 app.post('/lnew', (request, response) => {
-    console.log(request.body)
+    console.log(request.bosy)
     new signupmodel(request.body).save();
     response.send("Record Successfully Saved")
-
 })
 
 
@@ -62,14 +68,9 @@ app.post("/unew", (request, response) => {
     console.log(request.body);
     new ordermodel(request.body).save();
     response.send("Record Successfully Saved");
-  });
+});
 
 
-// app.post('/inew',(request,response)=>{
-//     console.log(request.body)
-//     new itemmodel(request.body).save();
-//     response.send("Record Successfully Saved")
-// })
 
 
 
@@ -94,10 +95,10 @@ app.get('/view', async (request, response) => {
 //     var data = await subcatemodel.find();
 //     response.send(data)
 // });
-app.get('/iview',async(request,response)=>{
-    var data=await itemmodel.find();
-    response.send(data)
-});
+// app.get('/iview',async(request,response)=>{
+//     var data=await itemmodel.find();
+//     response.send(data)
+// });
 
 app.put('/edit/:id', async (request, response) => {
     let id = request.params.id
@@ -142,9 +143,14 @@ app.post('/Login', async (request, response) => {
 
 app.post('/inew', upload.single('image1'), async (request, response) => {
     try {
-        const { Category, Subcategory, Description, Price } = request.body
+        const { sid, Description, Price } = request.body
+        if (!request.file) {
+            return response.status(400).json({ error: 'No file uploaded' });
+        }
+
         const newdata = new itemmodel({
-            Category, Subcategory, Description, Price,
+            sid,
+            Description, Price,
             image1: {
                 data: request.file.buffer,
                 contentType: request.file.mimetype,
@@ -162,70 +168,70 @@ app.post('/inew', upload.single('image1'), async (request, response) => {
 
 });
 
-app.put('/editi/:id',upload.single('image1'),async(request,response)=>{
-    try{
-        const id=request.params.id;
-        const{Category, Subcategory, Description, Price } = request.body;
-        let result=null;
-        if(request.file){
+app.put('/editi/:id', upload.single('image1'), async (request, response) => {
+    try {
+        const id = request.params.id;
+        const { Category, Subcategory, Description, Price } = request.body;
+        let result = null;
+        if (request.file) {
             console.log("hi")
-            const updatedData={
-                Category, 
+            const updatedData = {
+                Category,
                 Subcategory,
-                 Description,
-                  Price,
-                  image1: {
+                Description,
+                Price,
+                image1: {
                     data: request.file.buffer,
-                    contentType: request.file.mimetype,
+                    contentType: request.file.contentType,
                 }
 
             };
-            result=await itemmodel.findByIdAndUpdate(id.updatedData);
+            result = await itemmodel.findByIdAndUpdate(id.updatedData);
 
         }
-        else{
-            const updatedData={
-                Category, 
+        else {
+            const updatedData = {
+                Category,
                 Subcategory,
-                 Description,
-                  Price,
+                Description,
+                Price,
             }
-            result=await itemmodel.findByIdAndUpdate(id,updatedData);
+            result = await itemmodel.findByIdAndUpdate(id, updatedData);
 
         }
-        if(!result){
-            return response.status(404).json({message:'Item not found'});
+        if (!result) {
+            return response.status(404).json({ message: 'Item not found' });
         }
-        response.status(200).json({message:'Item updates successfully',data:result});
+        response.status(200).json({ message: 'Item updates successfully', data: result });
 
 
-    }catch(error){
+    } catch (error) {
         console.error(error);
-        response.status(500).json({error:'Internal Server Error'});
+        response.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
-app.get('/view1/:id',(req,res)=>{
-    const{id}=req.params
-    itemmodel.findById(id).then(data=>{
+app.get('/view1/:id', (req, res) => {
+    const { id } = req.params
+    itemmodel.findById(id).then(data => {
         res.send(data)
     })
 })
 
 app.get("/views", async (request, response) => {
     const result = await subcatemodel.aggregate([
-      {
-        $lookup: {
-          from: "cats",
-          localField: "cid",
-          foreignField: "_id",
-          as: "subc",
+        {
+            $lookup: {
+                from: "cats",
+                localField: "cid",
+                foreignField: "_id",
+                as: "subc",
+            },
         },
-      },
     ]);
     response.send(result);
-  });
-  module.exports = app;
+});
+module.exports = app;
 
 //   app.get("/iview", async (request, response) => {
 //     const result = await itemmodel.aggregate([
@@ -234,13 +240,55 @@ app.get("/views", async (request, response) => {
 //           from: "subcats",
 //           localField: "sid",
 //           foreignField: "_id",
-//           as: "it",
+//           as: "itemsub",
 //         },
 //       },
+//       {
+//         $unwind: "$itemsub"
+//       },
+//       {
+//         $lookup: {
+//           from: "cats",
+//           localField: "itemsub.cid",
+//           foreignField: "_id",
+//           as: "itemca",
+//         },
+//       },
+//       {
+//         $unwind: "$itemca"
+//       }
 //     ]);
+//     console.log(result);
 //     response.send(result);
 //   });
 //   module.exports = app;
 
 
-       
+app.get("/iview", async (request, response) => {
+
+    const result = await itemmodel.aggregate([
+
+        {
+            $lookup: {
+                from: 'subcats',
+                localField: "sid", 
+                foreignField: "_id",
+                as: "itemsub",
+            },
+        },
+
+           {
+            $lookup:{
+                from:"cats",
+                localField:"itemsub.cid",
+                foreignField:"_id",
+                as:"subca",
+            },
+           },
+
+    ]);
+    console.log(result);
+    response.send(result);
+
+});
+module.exports = app;
