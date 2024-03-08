@@ -82,10 +82,13 @@ app.get("/subview", async (request, response) => {
     var data = await subcatemodel.find();
     response.send(data);
 })
-app.get('/view', async (request, response) => {
-    var data = await catemodel.find();
+app.get('/oview', async (request, response) => {
+    var data = await ordermodel.find();
     response.send(data)
 });
+
+
+
 // app.get('/iview', async (request, response) => {
 //     var data = await itemmodel.find();
 //     response.send(data)
@@ -143,13 +146,14 @@ app.post('/Login', async (request, response) => {
 
 app.post('/inew', upload.single('image1'), async (request, response) => {
     try {
-        const { sid, Description, Price } = request.body
+        const {sid, Description, Price } = request.body
         if (!request.file) {
             return response.status(400).json({ error: 'No file uploaded' });
         }
+       
 
         const newdata = new itemmodel({
-            sid,
+          sid,
             Description, Price,
             image1: {
                 data: request.file.buffer,
@@ -213,7 +217,9 @@ app.put('/editi/:id', upload.single('image1'), async (request, response) => {
 
 app.get('/view1/:id', (req, res) => {
     const { id } = req.params
-    itemmodel.findById(id).then(data => {
+    itemmodel.findById(id)
+   
+    .then(data => {
         res.send(data)
     })
 })
@@ -233,62 +239,62 @@ app.get("/views", async (request, response) => {
 });
 module.exports = app;
 
-//   app.get("/iview", async (request, response) => {
-//     const result = await itemmodel.aggregate([
-//       {
-//         $lookup: {
-//           from: "subcats",
-//           localField: "sid",
-//           foreignField: "_id",
-//           as: "itemsub",
-//         },
-//       },
-//       {
-//         $unwind: "$itemsub"
-//       },
-//       {
-//         $lookup: {
-//           from: "cats",
-//           localField: "itemsub.cid",
-//           foreignField: "_id",
-//           as: "itemca",
-//         },
-//       },
-//       {
-//         $unwind: "$itemca"
-//       }
-//     ]);
-//     console.log(result);
-//     response.send(result);
-//   });
-//   module.exports = app;
-
-
-app.get("/iview", async (request, response) => {
-
+  app.get("/iview", async (request, response) => {
     const result = await itemmodel.aggregate([
-
-        {
-            $lookup: {
-                from: 'subcats',
-                localField: "sid", 
-                foreignField: "_id",
-                as: "itemsub",
-            },
+      {
+        $lookup: {
+          from: "subcats",
+          localField: "sid",
+          foreignField: "_id",
+          as: "itemsub",
         },
-
-           {
-            $lookup:{
-                from:"cats",
-                localField:"itemsub.cid",
-                foreignField:"_id",
-                as:"subca",
-            },
-           },
-
+      },
+      {
+        $unwind: "$itemsub"
+      },
+      {
+        $lookup: {
+          from: "cats",
+          localField: "itemsub.cid",
+          foreignField: "_id",
+          as: "itemca",
+        },
+      },
+      {
+        $unwind: "$itemca"
+      }
     ]);
     console.log(result);
     response.send(result);
+  });
+  module.exports = app;
 
-});
-module.exports = app;
+
+// app.get("/iview", async (request, response) => {
+
+//     const result = await itemmodel.aggregate([
+
+//         {
+//             $lookup: {
+//                 from: 'subcats',
+//                 localField: "sid", 
+//                 foreignField: "_id",
+//                 as: "itemsub",
+//             },
+//         },
+
+//            {
+//             $lookup:{
+//                 from:"cats",
+//                 localField:"itemsub.cid",
+//                 foreignField:"_id",
+//                 as:"subca",
+//             },
+//            },
+
+//     ]);
+//     console.log(result);
+//     response.send(result);
+
+// });
+// module.exports = app;
